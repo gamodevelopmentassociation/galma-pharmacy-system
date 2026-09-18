@@ -2,12 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Bell, ShoppingCart, Clock, Plus, Menu } from "lucide-react";
+import { Bell, ShoppingCart, Clock, Menu } from "lucide-react";
 import { SessionUser } from "@/lib/types";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import { AddProductModal } from "@/components/inventory/AddProductModal";
-import { toast } from "sonner";
 
 interface AppHeaderProps {
   user: SessionUser;
@@ -16,10 +13,7 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({ user, totalAlerts = 0, onOpenMobileMenu }: AppHeaderProps) {
-  const router = useRouter();
   const [time, setTime] = useState<string>("");
-  const [isAddMedicationOpen, setIsAddMedicationOpen] = useState(false);
-  const canAddMedication = user.role === "ADMIN" || user.role === "PHARMACIST";
 
   useEffect(() => {
     const update = () => {
@@ -88,20 +82,6 @@ export function AppHeader({ user, totalAlerts = 0, onOpenMobileMenu }: AppHeader
           </Link>
         )}
 
-        {/* Quick Add Medication Button */}
-        {canAddMedication && (
-          <button
-            type="button"
-            onClick={() => setIsAddMedicationOpen(true)}
-            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-semibold shadow-2xs transition-all active:scale-95 cursor-pointer"
-            title="Register new medication & lot"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Add Medication</span>
-            <span className="hidden sm:inline md:hidden">+ Drug</span>
-          </button>
-        )}
-
         {/* Fast POS Launch button */}
         <Link
           href="/pos"
@@ -113,17 +93,6 @@ export function AppHeader({ user, totalAlerts = 0, onOpenMobileMenu }: AppHeader
           <span className="sm:hidden font-bold">POS</span>
         </Link>
       </div>
-
-      {/* Add Medication Modal */}
-      <AddProductModal
-        isOpen={isAddMedicationOpen}
-        onClose={() => setIsAddMedicationOpen(false)}
-        onSuccess={() => {
-          setIsAddMedicationOpen(false);
-          toast.success("Medication registered successfully!");
-          router.refresh();
-        }}
-      />
     </header>
   );
 }
