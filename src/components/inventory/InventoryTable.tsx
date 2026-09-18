@@ -15,15 +15,21 @@ import {
   RefreshCw,
   Edit3,
   Trash2,
+  Download,
+  Printer,
+  FileSpreadsheet,
 } from "lucide-react";
 import { AddProductModal } from "./AddProductModal";
 import { EditProductModal } from "./EditProductModal";
 import { AddBatchModal } from "./AddBatchModal";
 import { StockAdjustmentModal } from "./StockAdjustmentModal";
 import { DeleteConfirmModal } from "./DeleteConfirmModal";
+import { InventoryReportModal } from "./InventoryReportModal";
 import { getInventoryProducts, getDistinctCategories } from "@/actions/inventory";
 import { PharmacySettings, SessionUser } from "@/lib/types";
+import { downloadInventoryCSV } from "@/lib/inventoryExport";
 import { differenceInDays, format } from "date-fns";
+import { toast } from "sonner";
 
 interface InventoryTableProps {
   initialProducts: any[];
@@ -55,6 +61,8 @@ export function InventoryTable({
 
   // Modals state
   const [isAddProductOpen, setIsAddProductOpen] = useState(initialAddOpen);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [selectedProductForEdit, setSelectedProductForEdit] = useState<any | null>(null);
   const [selectedProductForBatch, setSelectedProductForBatch] = useState<any | null>(null);
   const [selectedBatchForAdjustment, setSelectedBatchForAdjustment] = useState<any | null>(null);
@@ -66,6 +74,23 @@ export function InventoryTable({
   } | null>(null);
 
   const [isPending, startTransition] = useTransition();
+
+  const handleQuickDownloadCSV = async () => {
+    try {
+      setIsExporting(true);
+      const allData = await getInventoryProducts("", "ALL");
+      downloadInventoryCSV(
+        allData && allData.length > 0 ? allData : products,
+        settings.pharmacyName,
+        user.name
+      );
+      toast.success("Full inventory CSV downloaded successfully!");
+    } catch (err: any) {
+      toast.error("Failed to download CSV: " + err.message);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const refreshData = () => {
     startTransition(async () => {
@@ -122,17 +147,41 @@ export function InventoryTable({
           </p>
         </div>
 
-        {user.role !== "CASHIER" && (
-          <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Download CSV */}
+          <button
+            type="button"
+            onClick={handleQuickDownloadCSV}
+            disabled={isExporting}
+            className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold rounded-xl shadow-2xs transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer disabled:opacity-50"
+            title="Download full inventory and batches as A4 CSV spreadsheet"
+          >
+            <Download className="w-3.5 h-3.5 text-emerald-600" />
+            <span>{isExporting ? "Exporting..." : "Download CSV"}</span>
+          </button>
+
+          {/* A4 Report / PDF */}
+          <button
+            type="button"
+            onClick={() => setIsReportModalOpen(true)}
+            className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold rounded-xl shadow-2xs transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
+            title="Preview and print official A4 inventory audit sheet"
+          >
+            <Printer className="w-3.5 h-3.5 text-blue-600" />
+            <span>A4 Report (PDF)</span>
+          </button>
+
+          {user.role !== "CASHIER" && (
             <button
+              type="button"
               onClick={() => setIsAddProductOpen(true)}
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-emerald-600/20 transition-all flex items-center gap-1.5 active:scale-95"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-emerald-600/20 transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Add Medication</span>
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* KPI Cards */}
@@ -572,6 +621,23 @@ export function InventoryTable({
           onSuccess={refreshData}
         />
       )}
+
+      {/* Inventory A4 Report & CSV Modal */}
+      <InventoryReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        products={filteredProducts}
+        allProducts={products}
+        settings={settings}
+        user={user}
+        activeFilterSummary={
+          search
+            ? `Search query: "${search}"`
+            : category !== "ALL"
+            ? `Category: ${category}`
+            : undefined
+        }
+      />
     </div>
   );
 }
