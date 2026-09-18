@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
@@ -13,10 +14,12 @@ import {
   ShieldCheck,
   Settings,
   LogOut,
+  PlusCircle,
 } from "lucide-react";
 import { SessionUser } from "@/lib/types";
 import { logoutAction } from "@/actions/auth";
 import { toast } from "sonner";
+import { AddProductModal } from "@/components/inventory/AddProductModal";
 
 interface AppSidebarProps {
   user: SessionUser;
@@ -25,6 +28,7 @@ interface AppSidebarProps {
 export function AppSidebar({ user }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const [isAddMedicationOpen, setIsAddMedicationOpen] = useState(false);
 
   const handleLogout = async () => {
     toast.promise(logoutAction(), {
@@ -37,7 +41,24 @@ export function AppSidebar({ user }: AppSidebarProps) {
     });
   };
 
-  const navItems = [
+  type NavItem =
+    | {
+        title: string;
+        href: string;
+        icon: React.ComponentType<{ className?: string }>;
+        roles: string[];
+        isAction?: false;
+      }
+    | {
+        title: string;
+        icon: React.ComponentType<{ className?: string }>;
+        roles: string[];
+        isAction: true;
+        badge?: string;
+        onClick: () => void;
+      };
+
+  const navItems: NavItem[] = [
     {
       title: "Dashboard",
       href: "/dashboard",
@@ -49,6 +70,14 @@ export function AppSidebar({ user }: AppSidebarProps) {
       href: "/pos",
       icon: ShoppingCart,
       roles: ["ADMIN", "PHARMACIST", "CASHIER"],
+    },
+    {
+      title: "Add Medication",
+      icon: PlusCircle,
+      roles: ["ADMIN", "PHARMACIST"],
+      isAction: true,
+      badge: "+ New",
+      onClick: () => setIsAddMedicationOpen(true),
     },
     {
       title: "Inventory & Batches",
@@ -125,8 +154,30 @@ export function AppSidebar({ user }: AppSidebarProps) {
           Navigation
         </div>
         {allowedNav.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
           const Icon = item.icon;
+
+          if (item.isAction) {
+            return (
+              <button
+                key={item.title}
+                type="button"
+                onClick={item.onClick}
+                className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-emerald-800 bg-emerald-50/80 hover:bg-emerald-100 border border-emerald-200/80 transition-all group cursor-pointer active:scale-[0.98] shadow-2xs my-1 text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <Icon className="w-4 h-4 text-emerald-600 transition-transform group-hover:scale-110" />
+                  <span>{item.title}</span>
+                </div>
+                {item.badge && (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-600 text-white shadow-2xs">
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+            );
+          }
+
+          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
           return (
             <Link
@@ -177,6 +228,17 @@ export function AppSidebar({ user }: AppSidebarProps) {
           <span>Sign Out</span>
         </button>
       </div>
+
+      {/* Add Medication Modal */}
+      <AddProductModal
+        isOpen={isAddMedicationOpen}
+        onClose={() => setIsAddMedicationOpen(false)}
+        onSuccess={() => {
+          setIsAddMedicationOpen(false);
+          toast.success("Medication registered successfully!");
+          router.refresh();
+        }}
+      />
     </aside>
   );
 }

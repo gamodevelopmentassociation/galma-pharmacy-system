@@ -7,7 +7,7 @@ import { InventoryTable } from "@/components/inventory/InventoryTable";
 export default async function InventoryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; add?: string }>;
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
@@ -18,6 +18,7 @@ export default async function InventoryPage({
 
   const resolvedSearchParams = await searchParams;
   const initialTab = resolvedSearchParams?.tab || "all";
+  const initialAddOpen = resolvedSearchParams?.add === "true";
 
   const [products, settings] = await Promise.all([
     getInventoryProducts(),
@@ -43,6 +44,7 @@ export default async function InventoryPage({
       }
       user={user}
       initialTab={initialTab}
+      initialAddOpen={initialAddOpen}
     />
   );
 }

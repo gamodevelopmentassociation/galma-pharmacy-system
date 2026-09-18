@@ -30,9 +30,16 @@ interface InventoryTableProps {
   settings: PharmacySettings;
   user: SessionUser;
   initialTab?: string;
+  initialAddOpen?: boolean;
 }
 
-export function InventoryTable({ initialProducts, settings, user, initialTab = "all" }: InventoryTableProps) {
+export function InventoryTable({
+  initialProducts,
+  settings,
+  user,
+  initialTab = "all",
+  initialAddOpen = false,
+}: InventoryTableProps) {
   const [products, setProducts] = useState<any[]>(initialProducts);
   const [activeTab, setActiveTab] = useState<string>(initialTab);
   const [search, setSearch] = useState("");
@@ -47,7 +54,7 @@ export function InventoryTable({ initialProducts, settings, user, initialTab = "
   }, []);
 
   // Modals state
-  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const [isAddProductOpen, setIsAddProductOpen] = useState(initialAddOpen);
   const [selectedProductForEdit, setSelectedProductForEdit] = useState<any | null>(null);
   const [selectedProductForBatch, setSelectedProductForBatch] = useState<any | null>(null);
   const [selectedBatchForAdjustment, setSelectedBatchForAdjustment] = useState<any | null>(null);
