@@ -211,9 +211,36 @@ export async function createBatchAction(data: CreateBatchInput) {
 
 export interface StockAdjustmentInput {
   batchId: string;
-  type: "DAMAGED" | "EXPIRED" | "RETURNED" | "CORRECTION";
+  type: "DAMAGED" | "EXPIRED" | "RETURNED" | "RETURN_TO_SUPPLIER" | "CORRECTION";
   quantity: number; // positive for addition, negative for deduction
   reason: string;
+}
+
+export async function searchBatchesByNumber(query: string, limit = 12) {
+  try {
+    const q = query?.trim();
+    if (!q || q.length < 2) return [];
+
+    const batches = await prisma.inventoryBatch.findMany({
+      where: {
+        OR: [
+          { batchNumber: { contains: q, mode: "insensitive" } },
+          { product: { brandName: { contains: q, mode: "insensitive" } } },
+          { product: { genericName: { contains: q, mode: "insensitive" } } },
+          { product: { sku: { contains: q, mode: "insensitive" } } },
+          { product: { barcode: { contains: q, mode: "insensitive" } } },
+        ],
+      },
+      include: { product: true },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    });
+
+    return batches;
+  } catch (error: any) {
+    console.error("searchBatchesByNumber error:", error);
+    return [];
+  }
 }
 
 export async function adjustStockAction(data: StockAdjustmentInput) {
@@ -232,10 +259,21 @@ export async function adjustStockAction(data: StockAdjustmentInput) {
 
     if (!batch) return { success: false, error: "Batch not found." };
 
-    if (data.quantity < 0 && batch.quantity + data.quantity < 0) {
+    // Normalize direction by adjustment type.
+    // DAMAGED, EXPIRED and RETURN_TO_SUPPLIER always reduce stock.
+    // RETURNED (customer return) always adds stock back.
+    // CORRECTION respects the signed quantity passed in.
+    let adjustedQty = Number(data.quantity);
+    if (["DAMAGED", "EXPIRED", "RETURN_TO_SUPPLIER"].includes(data.type)) {
+      adjustedQty = -Math.abs(adjustedQty);
+    } else if (data.type === "RETURNED") {
+      adjustedQty = Math.abs(adjustedQty);
+    }
+
+    if (adjustedQty < 0 && batch.quantity + adjustedQty < 0) {
       return {
         success: false,
-        error: `Cannot reduce ${Math.abs(data.quantity)} units. Current batch balance is ${batch.quantity}.`,
+        error: `Cannot reduce ${Math.abs(adjustedQty)} units. Current batch balance is ${batch.quantity}.`,
       };
     }
 
@@ -245,7 +283,7 @@ export async function adjustStockAction(data: StockAdjustmentInput) {
           batchId: data.batchId,
           userId: user.id,
           type: data.type,
-          quantity: Number(data.quantity),
+          quantity: adjustedQty,
           reason: data.reason.trim(),
         },
       });
@@ -253,7 +291,7 @@ export async function adjustStockAction(data: StockAdjustmentInput) {
       await tx.inventoryBatch.update({
         where: { id: data.batchId },
         data: {
-          quantity: { increment: Number(data.quantity) },
+          quantity: { increment: adjustedQty },
         },
       });
 
@@ -263,7 +301,7 @@ export async function adjustStockAction(data: StockAdjustmentInput) {
           action: "ADJUST_STOCK",
           entity: "InventoryBatch",
           entityId: data.batchId,
-          details: `Stock Adjusted for ${batch.product.brandName} (${batch.batchNumber}): ${data.quantity > 0 ? "+" : ""}${data.quantity} (${data.type}) - Reason: ${data.reason}`,
+          details: `Stock Adjusted for ${batch.product.brandName} (${batch.batchNumber}): ${adjustedQty > 0 ? "+" : ""}${adjustedQty} (${data.type}) - Reason: ${data.reason}`,
         },
       });
 

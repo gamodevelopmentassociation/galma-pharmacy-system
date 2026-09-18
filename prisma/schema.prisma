@@ -98,7 +98,7 @@ model StockAdjustment {
   batch     InventoryBatch @relation(fields: [batchId], references: [id])
   userId    String
   user      User           @relation(fields: [userId], references: [id])
-  type      String         // DAMAGED, EXPIRED, RETURNED, CORRECTION
+  type      String         // DAMAGED, EXPIRED, RETURNED, RETURN_TO_SUPPLIER, CORRECTION
   quantity  Int            // positive (added) or negative (deducted)
   reason    String
   createdAt DateTime       @default(now())

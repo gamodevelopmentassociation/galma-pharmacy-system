@@ -18,6 +18,7 @@ import {
   Download,
   Printer,
   FileSpreadsheet,
+  PackageMinus,
 } from "lucide-react";
 import { AddProductModal } from "./AddProductModal";
 import { EditProductModal } from "./EditProductModal";
@@ -62,6 +63,7 @@ export function InventoryTable({
   // Modals state
   const [isAddProductOpen, setIsAddProductOpen] = useState(initialAddOpen);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isAdjustOpen, setIsAdjustOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [selectedProductForEdit, setSelectedProductForEdit] = useState<any | null>(null);
   const [selectedProductForBatch, setSelectedProductForBatch] = useState<any | null>(null);
@@ -172,14 +174,26 @@ export function InventoryTable({
           </button>
 
           {user.role !== "CASHIER" && (
-            <button
-              type="button"
-              onClick={() => setIsAddProductOpen(true)}
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-emerald-600/20 transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add Medication</span>
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => setIsAdjustOpen(true)}
+                className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold rounded-xl shadow-2xs transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
+                title="Adjust stock by batch number for expiry, damage, counting errors or return to supplier"
+              >
+                <PackageMinus className="w-3.5 h-3.5 text-amber-600" />
+                <span>Adjust Stock</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsAddProductOpen(true)}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-emerald-600/20 transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Medication</span>
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -608,9 +622,20 @@ export function InventoryTable({
 
       {selectedBatchForAdjustment && (
         <StockAdjustmentModal
+          key={selectedBatchForAdjustment.id}
           batch={selectedBatchForAdjustment}
           onClose={() => setSelectedBatchForAdjustment(null)}
           onSuccess={refreshData}
+        />
+      )}
+
+      {isAdjustOpen && (
+        <StockAdjustmentModal
+          onClose={() => setIsAdjustOpen(false)}
+          onSuccess={() => {
+            refreshData();
+            setIsAdjustOpen(false);
+          }}
         />
       )}
 

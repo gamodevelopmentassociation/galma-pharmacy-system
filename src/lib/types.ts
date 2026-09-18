@@ -2,7 +2,7 @@ export type Role = "ADMIN" | "PHARMACIST" | "CASHIER";
 
 export type PaymentMethod = "CASH" | "CARD" | "MOBILE_MONEY" | "CREDIT";
 export type PaymentStatus = "PAID" | "PENDING" | "REFUNDED";
-export type AdjustmentType = "DAMAGED" | "EXPIRED" | "RETURNED" | "CORRECTION";
+export type AdjustmentType = "DAMAGED" | "EXPIRED" | "RETURNED" | "RETURN_TO_SUPPLIER" | "CORRECTION";
 
 export interface SessionUser {
   id: string;
