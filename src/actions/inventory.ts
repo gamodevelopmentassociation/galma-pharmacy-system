@@ -12,11 +12,11 @@ export async function getInventoryProducts(search = "", category = "") {
           search
             ? {
                 OR: [
-                  { brandName: { contains: search } },
-                  { genericName: { contains: search } },
-                  { sku: { contains: search } },
-                  { barcode: { contains: search } },
-                  { manufacturer: { contains: search } },
+                  { brandName: { contains: search, mode: "insensitive" } },
+                  { genericName: { contains: search, mode: "insensitive" } },
+                  { sku: { contains: search, mode: "insensitive" } },
+                  { barcode: { contains: search, mode: "insensitive" } },
+                  { manufacturer: { contains: search, mode: "insensitive" } },
                 ],
               }
             : {},

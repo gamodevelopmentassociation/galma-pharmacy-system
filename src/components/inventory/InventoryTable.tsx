@@ -369,7 +369,7 @@ export function InventoryTable({ initialProducts, settings, user, initialTab = "
                               <div className="divide-y divide-slate-100">
                                 {p.batches.length === 0 ? (
                                   <p className="p-4 text-xs text-slate-400 text-center">
-                                    No active stock batches. Click "+ Add Batch" to record intake.
+                                    No active stock batches. Click &quot;+ Add Batch&quot; to record intake.
                                   </p>
                                 ) : (
                                   p.batches.map((b: any) => {

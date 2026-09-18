@@ -11,10 +11,10 @@ export async function searchPOSProducts(query = "", category = "") {
           query
             ? {
                 OR: [
-                  { brandName: { contains: query } },
-                  { genericName: { contains: query } },
-                  { sku: { contains: query } },
-                  { barcode: { contains: query } },
+                  { brandName: { contains: query, mode: "insensitive" } },
+                  { genericName: { contains: query, mode: "insensitive" } },
+                  { sku: { contains: query, mode: "insensitive" } },
+                  { barcode: { contains: query, mode: "insensitive" } },
                 ],
               }
             : {},
