@@ -1,0 +1,131 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id           String            @id @default(cuid())
+  name         String
+  email        String            @unique
+  passwordHash String
+  role         String            @default("CASHIER") // ADMIN, PHARMACIST, CASHIER
+  phone        String?
+  isActive     Boolean           @default(true)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  sales        Sale[]
+  adjustments  StockAdjustment[]
+  auditLogs    AuditLog[]
+}
+
+model Product {
+  id           String           @id @default(cuid())
+  sku          String           @unique
+  barcode      String?          @unique
+  brandName    String
+  genericName  String
+  category     String           // Tablet, Syrup, Injection, Capsule, Ointment, Drops, Inhaler, Suspension
+  dosageForm   String           // e.g. "500mg", "100ml (250mg/5ml)", "5ml", "20mg"
+  manufacturer String
+  description  String?
+  reorderLevel Int              @default(15)
+  unit         String           @default("Box") // Box, Strip, Bottle, Ampoule, Vial, Tube
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  batches      InventoryBatch[]
+}
+
+model InventoryBatch {
+  id            String            @id @default(cuid())
+  productId     String
+  product       Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  batchNumber   String
+  quantity      Int               @default(0)
+  initialQty    Int               @default(0)
+  purchasePrice Float
+  sellingPrice  Float
+  expiryDate    DateTime
+  supplier      String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  saleItems     SaleItem[]
+  adjustments   StockAdjustment[]
+}
+
+model Sale {
+  id            String     @id @default(cuid())
+  invoiceNumber String     @unique
+  cashierId     String
+  cashier       User       @relation(fields: [cashierId], references: [id])
+  customerName  String?    @default("Walk-in Customer")
+  customerPhone String?
+  subtotal      Float
+  discount      Float      @default(0)
+  tax           Float      @default(0)
+  totalAmount   Float
+  paymentMethod String     @default("CASH") // CASH, CARD, MOBILE_MONEY, CREDIT
+  paymentStatus String     @default("PAID") // PAID, PENDING, REFUNDED
+  notes         String?
+  createdAt     DateTime   @default(now())
+  items         SaleItem[]
+}
+
+model SaleItem {
+  id            String         @id @default(cuid())
+  saleId        String
+  sale          Sale           @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  batchId       String
+  batch         InventoryBatch @relation(fields: [batchId], references: [id])
+  productName   String
+  genericName   String
+  quantity      Int
+  unitPrice     Float
+  purchasePrice Float
+  totalPrice    Float
+}
+
+model StockAdjustment {
+  id        String         @id @default(cuid())
+  batchId   String
+  batch     InventoryBatch @relation(fields: [batchId], references: [id])
+  userId    String
+  user      User           @relation(fields: [userId], references: [id])
+  type      String         // DAMAGED, EXPIRED, RETURNED, CORRECTION
+  quantity  Int            // positive (added) or negative (deducted)
+  reason    String
+  createdAt DateTime       @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String   // LOGIN, LOGOUT, CREATE_PRODUCT, UPDATE_PRODUCT, SALE_COMPLETED, ADJUST_STOCK, UPDATE_SETTINGS, CREATE_USER, UPDATE_USER
+  entity    String   // Product, Sale, User, Batch, Settings, Inventory
+  entityId  String?
+  details   String?  // Description / serialized metadata
+  ipAddress String?
+  createdAt DateTime @default(now())
+}
+
+model Settings {
+  id             String   @id @default("default")
+  pharmacyName   String   @default("Galma Pharmacy & Healthcare")
+  tagline        String   @default("Precision Care & Trusted Pharmaceuticals")
+  address        String   @default("Bole Medhanialem Road, Addis Ababa, Ethiopia")
+  phone          String   @default("+251 911 234 567")
+  email          String   @default("care@galmapharmacy.com")
+  taxRate        Float    @default(5.0)
+  currency       String   @default("ETB")
+  currencySymbol String   @default("ETB")
+  receiptFooter  String   @default("Thank you for choosing Galma Pharmacy. Wishing you speedy recovery!")
+  updatedAt      DateTime @updatedAt
+}
