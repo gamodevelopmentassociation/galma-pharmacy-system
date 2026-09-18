@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { X, Plus, Package, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { createProductAction, CreateProductInput } from "@/actions/inventory";
+import { createProductAction, CreateProductInput, getDistinctCategories } from "@/actions/inventory";
 
 interface AddProductModalProps {
   isOpen: boolean;
@@ -11,7 +11,7 @@ interface AddProductModalProps {
   onSuccess: () => void;
 }
 
-const CATEGORIES = [
+const DEFAULT_CATEGORIES = [
   "Antibiotics",
   "Analgesics",
   "Antidiabetic",
@@ -33,12 +33,23 @@ export function AddProductModal({ isOpen, onClose, onSuccess }: AddProductModalP
   const [barcode, setBarcode] = useState("");
   const [brandName, setBrandName] = useState("");
   const [genericName, setGenericName] = useState("");
-  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES);
+  const [category, setCategory] = useState(DEFAULT_CATEGORIES[0]);
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
   const [dosageForm, setDosageForm] = useState("");
   const [manufacturer, setManufacturer] = useState("");
   const [reorderLevel, setReorderLevel] = useState<number>(15);
   const [unit, setUnit] = useState(UNITS[0]);
   const [description, setDescription] = useState("");
+
+  useEffect(() => {
+    getDistinctCategories().then((cats) => {
+      if (cats && cats.length > 0) {
+        setCategories(cats);
+      }
+    });
+  }, []);
 
   // Optional initial batch fields
   const [includeInitialBatch, setIncludeInitialBatch] = useState(true);
@@ -193,18 +204,69 @@ export function AddProductModal({ isOpen, onClose, onSuccess }: AddProductModalP
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
-                <label className="text-xs font-semibold text-slate-700 block mb-1">Category</label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-emerald-500 focus:bg-white"
-                >
-                  {CATEGORIES.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-semibold text-slate-700">Category</label>
+                  <button
+                    type="button"
+                    onClick={() => setIsAddingCategory(!isAddingCategory)}
+                    className="text-[11px] text-emerald-600 hover:text-emerald-700 font-semibold flex items-center gap-0.5 cursor-pointer"
+                  >
+                    <Plus className="w-3 h-3" />
+                    <span>{isAddingCategory ? "Select Existing" : "+ New"}</span>
+                  </button>
+                </div>
+
+                {isAddingCategory ? (
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="text"
+                      placeholder="e.g. Dermatology"
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                      className="w-full px-3 py-2 text-xs bg-slate-50 border border-emerald-300 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-emerald-500 focus:bg-white"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const trimmed = newCategoryName.trim();
+                        if (!trimmed) {
+                          toast.error("Please enter a category name");
+                          return;
+                        }
+                        if (!categories.includes(trimmed)) {
+                          setCategories((prev) => [...prev, trimmed].sort());
+                        }
+                        setCategory(trimmed);
+                        setNewCategoryName("");
+                        setIsAddingCategory(false);
+                        toast.success(`Category "${trimmed}" added!`);
+                      }}
+                      className="px-2.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl cursor-pointer"
+                    >
+                      Add
+                    </button>
+                  </div>
+                ) : (
+                  <select
+                    value={category}
+                    onChange={(e) => {
+                      if (e.target.value === "__NEW__") {
+                        setIsAddingCategory(true);
+                      } else {
+                        setCategory(e.target.value);
+                      }
+                    }}
+                    className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-emerald-500 focus:bg-white"
+                  >
+                    {categories.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                    <option value="__NEW__">+ Add Custom Category...</option>
+                  </select>
+                )}
               </div>
 
               <div>

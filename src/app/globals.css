@@ -154,8 +154,13 @@ body {
   background: #94a3b8;
 }
 
-/* Print specific styles for Receipts */
+/* Print specific styles for Receipts & A4 Invoices */
 @media print {
+  @page {
+    size: auto;
+    margin: 10mm;
+  }
+
   body * {
     visibility: hidden;
   }
@@ -170,7 +175,7 @@ body {
     top: 0;
     width: 100%;
     margin: 0;
-    padding: 12px;
+    padding: 0;
     background: white !important;
     color: black !important;
     box-shadow: none !important;

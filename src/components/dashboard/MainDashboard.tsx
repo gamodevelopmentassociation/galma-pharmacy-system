@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   DollarSign,
   TrendingUp,
@@ -15,9 +17,12 @@ import {
   BarChart3,
   Clock,
   ShieldAlert,
+  Plus,
 } from "lucide-react";
 import { PharmacySettings, SessionUser } from "@/lib/types";
 import { format } from "date-fns";
+import { toast } from "sonner";
+import { AddProductModal } from "@/components/inventory/AddProductModal";
 
 interface MainDashboardProps {
   kpis: any;
@@ -28,6 +33,8 @@ interface MainDashboardProps {
 }
 
 export function MainDashboard({ kpis, alerts, recentSales, settings, user }: MainDashboardProps) {
+  const router = useRouter();
+  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const isAdmin = user.role === "ADMIN";
   const isPharmacist = user.role === "PHARMACIST";
 
@@ -51,11 +58,22 @@ export function MainDashboard({ kpis, alerts, recentSales, settings, user }: Mai
           <div className="flex flex-wrap items-center gap-3 mt-5">
             <Link
               href="/pos"
-              className="px-5 py-2.5 rounded-xl bg-white text-emerald-900 font-bold text-xs hover:bg-emerald-50 transition-all shadow-md flex items-center gap-2 active:scale-95"
+              className="px-5 py-2.5 rounded-xl bg-white text-emerald-900 font-bold text-xs hover:bg-emerald-50 transition-all shadow-md flex items-center gap-2 active:scale-95 cursor-pointer"
             >
               <ShoppingCart className="w-4 h-4 text-emerald-700" />
               <span>Launch POS Terminal</span>
             </Link>
+
+            {(isAdmin || isPharmacist) && (
+              <button
+                type="button"
+                onClick={() => setIsAddProductOpen(true)}
+                className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs transition-all shadow-md flex items-center gap-1.5 active:scale-95 cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>+ Add Medication</span>
+              </button>
+            )}
 
             {isAdmin && (
               <Link
@@ -187,6 +205,31 @@ export function MainDashboard({ kpis, alerts, recentSales, settings, user }: Mai
         </Link>
       </div>
 
+      {/* Quick Medication Intake Banner */}
+      {(isAdmin || isPharmacist) && (
+        <div className="bg-gradient-to-r from-emerald-50 via-teal-50 to-slate-50 border border-emerald-200/80 p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shrink-0 shadow-sm shadow-emerald-600/30">
+              <Package className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">Direct Medication & Category Intake</h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Register incoming pharmaceuticals, lot numbers, and custom categories directly from the dashboard.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsAddProductOpen(true)}
+            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 whitespace-nowrap active:scale-95 cursor-pointer shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Product Now</span>
+          </button>
+        </div>
+      )}
+
       {/* Grid: Expiry Alert Feed & Recent Sales */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Urgent Expiry & Stock Action Feed */}
@@ -308,6 +351,16 @@ export function MainDashboard({ kpis, alerts, recentSales, settings, user }: Mai
           </div>
         </div>
       </div>
+
+      {/* Add Medication Modal */}
+      <AddProductModal
+        isOpen={isAddProductOpen}
+        onClose={() => setIsAddProductOpen(false)}
+        onSuccess={() => {
+          router.refresh();
+          toast.success("Medication added to inventory successfully!");
+        }}
+      />
     </div>
   );
 }

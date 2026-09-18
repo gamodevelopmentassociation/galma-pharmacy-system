@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import {
   Search,
   Plus,
@@ -21,7 +21,7 @@ import { EditProductModal } from "./EditProductModal";
 import { AddBatchModal } from "./AddBatchModal";
 import { StockAdjustmentModal } from "./StockAdjustmentModal";
 import { DeleteConfirmModal } from "./DeleteConfirmModal";
-import { getInventoryProducts } from "@/actions/inventory";
+import { getInventoryProducts, getDistinctCategories } from "@/actions/inventory";
 import { PharmacySettings, SessionUser } from "@/lib/types";
 import { differenceInDays, format } from "date-fns";
 
@@ -37,7 +37,14 @@ export function InventoryTable({ initialProducts, settings, user, initialTab = "
   const [activeTab, setActiveTab] = useState<string>(initialTab);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("ALL");
+  const [categories, setCategories] = useState<string[]>([]);
   const [expandedProductIds, setExpandedProductIds] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    getDistinctCategories().then((cats) => {
+      if (cats && cats.length > 0) setCategories(cats);
+    });
+  }, []);
 
   // Modals state
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
@@ -196,9 +203,9 @@ export function InventoryTable({ initialProducts, settings, user, initialTab = "
             ))}
           </div>
 
-          {/* Search and Category */}
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1 md:w-64">
+          {/* Search and Category Filter */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative flex-1 md:w-56">
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
@@ -208,9 +215,26 @@ export function InventoryTable({ initialProducts, settings, user, initialTab = "
                 className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-1 focus:ring-emerald-500 focus:bg-white"
               />
             </div>
+
+            <select
+              value={category}
+              onChange={(e) => handleSearch(search, e.target.value)}
+              className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-slate-700 focus:outline-hidden focus:ring-1 focus:ring-emerald-500 font-medium cursor-pointer"
+            >
+              <option value="ALL">All Categories</option>
+              {Array.from(new Set([...categories, ...products.map((p) => p.category)]))
+                .filter(Boolean)
+                .sort()
+                .map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+            </select>
+
             <button
               onClick={refreshData}
-              className="p-1.5 rounded-xl text-slate-500 hover:bg-slate-100 border border-slate-200 transition-colors"
+              className="p-1.5 rounded-xl text-slate-500 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
               title="Refresh inventory"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isPending ? "animate-spin" : ""}`} />
@@ -497,14 +521,24 @@ export function InventoryTable({ initialProducts, settings, user, initialTab = "
       <AddProductModal
         isOpen={isAddProductOpen}
         onClose={() => setIsAddProductOpen(false)}
-        onSuccess={refreshData}
+        onSuccess={() => {
+          refreshData();
+          getDistinctCategories().then((cats) => {
+            if (cats && cats.length > 0) setCategories(cats);
+          });
+        }}
       />
 
       {selectedProductForEdit && (
         <EditProductModal
           product={selectedProductForEdit}
           onClose={() => setSelectedProductForEdit(null)}
-          onSuccess={refreshData}
+          onSuccess={() => {
+            refreshData();
+            getDistinctCategories().then((cats) => {
+              if (cats && cats.length > 0) setCategories(cats);
+            });
+          }}
         />
       )}
 

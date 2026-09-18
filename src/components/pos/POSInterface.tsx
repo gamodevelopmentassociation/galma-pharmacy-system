@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useMemo } from "react";
+import { useState, useTransition, useMemo, useEffect } from "react";
 import {
   Search,
   ShoppingCart,
@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { processSaleTransaction, searchPOSProducts } from "@/actions/pos";
+import { getDistinctCategories } from "@/actions/inventory";
 import { CartItem, PharmacySettings, SessionUser } from "@/lib/types";
 import { ReceiptModal } from "./ReceiptModal";
 
@@ -30,7 +31,7 @@ interface POSInterfaceProps {
   user: SessionUser;
 }
 
-const CATEGORIES = [
+const DEFAULT_CATEGORIES = [
   "ALL",
   "Antibiotics",
   "Analgesics",
@@ -46,6 +47,7 @@ const CATEGORIES = [
 
 export function POSInterface({ initialProducts, settings, user }: POSInterfaceProps) {
   const [products, setProducts] = useState<any[]>(initialProducts);
+  const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -56,6 +58,14 @@ export function POSInterface({ initialProducts, settings, user }: POSInterfacePr
   const [paymentMethod, setPaymentMethod] = useState<"CASH" | "CARD" | "MOBILE_MONEY">("CASH");
   const [completedSale, setCompletedSale] = useState<any | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    getDistinctCategories().then((cats) => {
+      if (cats && cats.length > 0) {
+        setCategories(["ALL", ...cats]);
+      }
+    });
+  }, []);
 
   // Search filtering
   const handleSearch = (query: string, category = selectedCategory) => {
@@ -230,11 +240,11 @@ export function POSInterface({ initialProducts, settings, user }: POSInterfacePr
 
         {/* Category Filter Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-2.5 mb-2 scrollbar-none">
-          {CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => handleCategorySelect(cat)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 selectedCategory === cat
                   ? "bg-slate-900 text-white shadow-xs"
                   : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"

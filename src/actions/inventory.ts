@@ -518,3 +518,34 @@ export async function deleteBatchAction(batchId: string) {
     return { success: false, error: error.message || "Failed to remove batch." };
   }
 }
+
+export async function getDistinctCategories(): Promise<string[]> {
+  const defaults = [
+    "Antibiotics",
+    "Analgesics",
+    "Antidiabetic",
+    "Cardiovascular",
+    "Gastrointestinal",
+    "Respiratory",
+    "Antihistamine",
+    "Vitamins & Supplements",
+    "Topical",
+    "Syrups",
+    "Injections",
+    "Ophthalmic",
+  ];
+
+  try {
+    const products = await prisma.product.findMany({
+      select: { category: true },
+      distinct: ["category"],
+      orderBy: { category: "asc" },
+    });
+    const dbCategories = products.map((p) => p.category).filter(Boolean);
+    return Array.from(new Set([...defaults, ...dbCategories])).sort();
+  } catch (error) {
+    console.error("getDistinctCategories error:", error);
+    return defaults;
+  }
+}
+
