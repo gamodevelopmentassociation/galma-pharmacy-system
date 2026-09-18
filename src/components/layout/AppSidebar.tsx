@@ -15,6 +15,7 @@ import {
   Settings,
   LogOut,
   PlusCircle,
+  X,
 } from "lucide-react";
 import { SessionUser } from "@/lib/types";
 import { logoutAction } from "@/actions/auth";
@@ -23,9 +24,11 @@ import { AddProductModal } from "@/components/inventory/AddProductModal";
 
 interface AppSidebarProps {
   user: SessionUser;
+  isMobile?: boolean;
+  onNavigate?: () => void;
 }
 
-export function AppSidebar({ user }: AppSidebarProps) {
+export function AppSidebar({ user, isMobile = false, onNavigate }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [isAddMedicationOpen, setIsAddMedicationOpen] = useState(false);
@@ -128,24 +131,43 @@ export function AppSidebar({ user }: AppSidebarProps) {
   const currentRoleStyle = roleColors[user.role] || roleColors.CASHIER;
 
   return (
-    <aside className="w-64 bg-white border-r border-slate-200 flex flex-col h-screen sticky top-0 z-30 select-none shadow-xs">
+    <aside
+      className={`${
+        isMobile
+          ? "w-full bg-white flex flex-col h-full select-none"
+          : "w-64 bg-white border-r border-slate-200 flex flex-col h-screen sticky top-0 z-30 select-none shadow-xs"
+      }`}
+    >
       {/* Brand Header with Official Logo */}
-      <div className="p-4 border-b border-slate-100 flex items-center gap-3">
-        <div className="w-10 h-10 relative bg-white p-1 rounded-xl shadow-xs border border-slate-200 flex items-center justify-center shrink-0">
-          <Image
-            src="/logo.png"
-            alt="Galma Logo"
-            width={34}
-            height={34}
-            className="object-contain"
-          />
+      <div className="p-4 border-b border-slate-100 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 overflow-hidden">
+          <div className="w-10 h-10 relative bg-white p-1 rounded-xl shadow-xs border border-slate-200 flex items-center justify-center shrink-0">
+            <Image
+              src="/logo.png"
+              alt="Galma Logo"
+              width={34}
+              height={34}
+              className="object-contain"
+            />
+          </div>
+          <div className="overflow-hidden">
+            <span className="font-bold text-base tracking-tight text-slate-900 block truncate">
+              Galma Pharmacy
+            </span>
+            <p className="text-[11px] text-slate-500 font-medium">Healthcare OS</p>
+          </div>
         </div>
-        <div className="overflow-hidden">
-          <span className="font-bold text-base tracking-tight text-slate-900 block truncate">
-            Galma Pharmacy
-          </span>
-          <p className="text-[11px] text-slate-500 font-medium">Healthcare OS</p>
-        </div>
+
+        {isMobile && (
+          <button
+            type="button"
+            onClick={onNavigate}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+            title="Close navigation menu"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* Navigation Links */}
@@ -161,7 +183,10 @@ export function AppSidebar({ user }: AppSidebarProps) {
               <button
                 key={item.title}
                 type="button"
-                onClick={item.onClick}
+                onClick={() => {
+                  item.onClick();
+                  if (isMobile && onNavigate) onNavigate();
+                }}
                 className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-emerald-800 bg-emerald-50/80 hover:bg-emerald-100 border border-emerald-200/80 transition-all group cursor-pointer active:scale-[0.98] shadow-2xs my-1 text-left"
               >
                 <div className="flex items-center gap-3">
@@ -183,6 +208,9 @@ export function AppSidebar({ user }: AppSidebarProps) {
             <Link
               key={item.href}
               href={item.href}
+              onClick={() => {
+                if (isMobile && onNavigate) onNavigate();
+              }}
               className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all group ${
                 isActive
                   ? "bg-emerald-600 text-white shadow-xs font-semibold"

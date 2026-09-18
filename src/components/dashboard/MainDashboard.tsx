@@ -32,15 +32,15 @@ export function MainDashboard({ kpis, alerts, recentSales, settings, user }: Mai
   const isPharmacist = user.role === "PHARMACIST";
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
       {/* Welcome Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-800 via-teal-700 to-slate-900 p-6 sm:p-8 text-white shadow-xl shadow-emerald-950/10">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-emerald-800 via-teal-700 to-slate-900 p-4 sm:p-8 text-white shadow-xl shadow-emerald-950/10">
         <div className="relative z-10 max-w-2xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-semibold text-emerald-200 mb-3 border border-white/10">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Clinical & Pharmacy Management System</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+          <h1 className="text-xl sm:text-3xl font-bold tracking-tight text-white">
             {settings.pharmacyName}
           </h1>
           <p className="text-xs sm:text-sm text-emerald-100/80 mt-1 leading-relaxed">
@@ -48,10 +48,10 @@ export function MainDashboard({ kpis, alerts, recentSales, settings, user }: Mai
             <span className="text-white">{user.name}</span>
           </p>
 
-          <div className="flex flex-wrap items-center gap-3 mt-5">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-4 sm:mt-5">
             <Link
               href="/pos"
-              className="px-5 py-2.5 rounded-xl bg-white text-emerald-900 font-bold text-xs hover:bg-emerald-50 transition-all shadow-md flex items-center gap-2 active:scale-95 cursor-pointer"
+              className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-white text-emerald-900 font-bold text-xs hover:bg-emerald-50 transition-all shadow-md flex items-center gap-2 active:scale-95 cursor-pointer"
             >
               <ShoppingCart className="w-4 h-4 text-emerald-700" />
               <span>Launch POS Terminal</span>
@@ -60,7 +60,7 @@ export function MainDashboard({ kpis, alerts, recentSales, settings, user }: Mai
             {isAdmin && (
               <Link
                 href="/reports"
-                className="px-4 py-2.5 rounded-xl bg-emerald-900/60 hover:bg-emerald-900/80 border border-white/20 text-white font-semibold text-xs transition-all flex items-center gap-1.5"
+                className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-emerald-900/60 hover:bg-emerald-900/80 border border-white/20 text-white font-semibold text-xs transition-all flex items-center gap-1.5"
               >
                 <BarChart3 className="w-4 h-4 text-emerald-300" />
                 <span>Consolidated Financials</span>
@@ -70,7 +70,7 @@ export function MainDashboard({ kpis, alerts, recentSales, settings, user }: Mai
             {isPharmacist && (
               <Link
                 href="/inventory"
-                className="px-4 py-2.5 rounded-xl bg-emerald-900/60 hover:bg-emerald-900/80 border border-white/20 text-white font-semibold text-xs transition-all flex items-center gap-1.5"
+                className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-emerald-900/60 hover:bg-emerald-900/80 border border-white/20 text-white font-semibold text-xs transition-all flex items-center gap-1.5"
               >
                 <Package className="w-4 h-4 text-emerald-300" />
                 <span>Inventory & Batches</span>
@@ -85,7 +85,7 @@ export function MainDashboard({ kpis, alerts, recentSales, settings, user }: Mai
       </div>
 
       {/* Primary KPI Metric Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {isAdmin ? (
           <>
             <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">

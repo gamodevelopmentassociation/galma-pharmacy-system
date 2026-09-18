@@ -132,7 +132,7 @@ export function InventoryTable({
   const totalNearExpiry = products.filter((p) => p.hasNearExpiry || p.hasExpired).length;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
       {/* Top Header & Action */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -299,8 +299,8 @@ export function InventoryTable({
         </div>
 
         {/* Product & Batches Table */}
-        <div className="border border-slate-200 rounded-xl overflow-hidden">
-          <table className="w-full text-left text-xs">
+        <div className="border border-slate-200 rounded-xl overflow-x-auto">
+          <table className="w-full text-left text-xs min-w-[780px]">
             <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider text-[10px]">
               <tr>
                 <th className="py-3 px-3 w-8"></th>

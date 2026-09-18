@@ -29,7 +29,7 @@ export function InvoicesList({ sales, settings, user }: InvoicesListProps) {
   });
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -46,8 +46,8 @@ export function InvoicesList({ sales, settings, user }: InvoicesListProps) {
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-3">
-        <div className="relative flex-1 min-w-[240px]">
+      <div className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-3">
+        <div className="relative flex-1 min-w-[200px]">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
@@ -75,8 +75,8 @@ export function InvoicesList({ sales, settings, user }: InvoicesListProps) {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <table className="w-full text-left text-xs">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-x-auto">
+        <table className="w-full text-left text-xs min-w-[720px]">
           <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider text-[10px]">
             <tr>
               <th className="py-3 px-4">Invoice #</th>

@@ -85,7 +85,7 @@ export function SettingsForm({ initialSettings, user }: SettingsFormProps) {
   };
 
   return (
-    <div className="p-6 max-w-4xl space-y-6">
+    <div className="p-3 sm:p-6 max-w-4xl space-y-4 sm:space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">

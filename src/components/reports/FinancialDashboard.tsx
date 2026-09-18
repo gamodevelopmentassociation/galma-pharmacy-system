@@ -196,9 +196,9 @@ export function FinancialDashboard({
   const recentSales = report?.recentSales || [];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header & Controls */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
             <span>Consolidated Financials & Revenue Analytics</span>
@@ -223,9 +223,9 @@ export function FinancialDashboard({
       </div>
 
       {/* Date & Filter Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-3">
         {/* Presets */}
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl overflow-x-auto max-w-full">
           {[
             { id: "today", label: "Today" },
             { id: "week", label: "7 Days" },
@@ -312,7 +312,7 @@ export function FinancialDashboard({
       </div>
 
       {/* Primary Financial KPI Cards Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Gross Revenue / Total Invoiced */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between text-slate-400 mb-2">
@@ -634,7 +634,7 @@ export function FinancialDashboard({
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-xs text-left">
+          <table className="w-full text-xs text-left min-w-[680px]">
             <thead>
               <tr className="border-b border-slate-200 text-slate-400 font-semibold uppercase text-[10px] tracking-wider">
                 <th className="py-2.5 px-3">Invoice</th>

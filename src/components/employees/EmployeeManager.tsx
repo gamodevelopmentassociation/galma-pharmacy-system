@@ -125,7 +125,7 @@ export function EmployeeManager({ initialEmployees, currentUser }: EmployeeManag
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -142,7 +142,7 @@ export function EmployeeManager({ initialEmployees, currentUser }: EmployeeManag
 
         <button
           onClick={() => setIsAddOpen(true)}
-          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-emerald-600/20 transition-all flex items-center gap-1.5 active:scale-95"
+          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-emerald-600/20 transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
         >
           <UserPlus className="w-4 h-4" />
           <span>Add New Employee</span>
@@ -150,8 +150,8 @@ export function EmployeeManager({ initialEmployees, currentUser }: EmployeeManag
       </div>
 
       {/* Staff Directory Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <table className="w-full text-left text-xs">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-x-auto">
+        <table className="w-full text-left text-xs min-w-[700px]">
           <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider text-[10px]">
             <tr>
               <th className="py-3 px-4">Employee Name</th>

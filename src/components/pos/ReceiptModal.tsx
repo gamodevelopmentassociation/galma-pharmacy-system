@@ -320,14 +320,14 @@ export function ReceiptModal({ sale, settings, onClose, isNewSale = false }: Rec
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
       <div
         className={`bg-white rounded-2xl shadow-2xl w-full overflow-hidden border border-slate-200 transition-all ${
           formatMode === "a4" ? "max-w-3xl" : "max-w-md"
         }`}
       >
         {/* Modal Action Bar (Hidden on Print) */}
-        <div className="no-print bg-slate-50 border-b border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="no-print bg-slate-50 border-b border-slate-200 p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-emerald-700 font-semibold text-sm">
             <CheckCircle2 className="w-5 h-5 text-emerald-600" />
             <span>{isNewSale ? "Sale Completed Successfully" : "Official Sales Receipt"}</span>

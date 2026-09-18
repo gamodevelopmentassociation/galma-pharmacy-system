@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell, ShoppingCart, Clock, Plus } from "lucide-react";
+import { Bell, ShoppingCart, Clock, Plus, Menu } from "lucide-react";
 import { SessionUser } from "@/lib/types";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { AddProductModal } from "@/components/inventory/AddProductModal";
@@ -12,9 +12,10 @@ import { toast } from "sonner";
 interface AppHeaderProps {
   user: SessionUser;
   totalAlerts?: number;
+  onOpenMobileMenu?: () => void;
 }
 
-export function AppHeader({ user, totalAlerts = 0 }: AppHeaderProps) {
+export function AppHeader({ user, totalAlerts = 0, onOpenMobileMenu }: AppHeaderProps) {
   const router = useRouter();
   const [time, setTime] = useState<string>("");
   const [isAddMedicationOpen, setIsAddMedicationOpen] = useState(false);
@@ -33,14 +34,24 @@ export function AppHeader({ user, totalAlerts = 0 }: AppHeaderProps) {
   }, []);
 
   return (
-    <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-20 shadow-xs">
-      <div className="flex items-center gap-4">
-        <div>
-          <h1 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
-            <span>Welcome back, {user.name}</span>
-            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+    <header className="h-16 bg-white border-b border-slate-200 px-3 sm:px-6 flex items-center justify-between sticky top-0 z-20 shadow-xs shrink-0">
+      <div className="flex items-center gap-2 sm:gap-3 overflow-hidden">
+        {onOpenMobileMenu && (
+          <button
+            type="button"
+            onClick={onOpenMobileMenu}
+            className="p-2 -ml-1 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 lg:hidden cursor-pointer shrink-0"
+            title="Open navigation menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
+        <div className="overflow-hidden">
+          <h1 className="text-xs sm:text-sm font-semibold text-slate-800 flex items-center gap-1.5 sm:gap-2 truncate">
+            <span className="truncate">{user.name}</span>
+            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
           </h1>
-          <p className="text-xs text-slate-500">
+          <p className="text-[11px] text-slate-500 hidden sm:block truncate">
             {new Date().toLocaleDateString(undefined, {
               weekday: "short",
               month: "short",
@@ -51,7 +62,7 @@ export function AppHeader({ user, totalAlerts = 0 }: AppHeaderProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1.5 sm:gap-3">
         {/* Visual Theme Switcher */}
         <ThemeToggle />
 
@@ -82,21 +93,24 @@ export function AppHeader({ user, totalAlerts = 0 }: AppHeaderProps) {
           <button
             type="button"
             onClick={() => setIsAddMedicationOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-semibold shadow-2xs transition-all active:scale-95 cursor-pointer"
+            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-semibold shadow-2xs transition-all active:scale-95 cursor-pointer"
             title="Register new medication & lot"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Add Medication</span>
+            <span className="hidden md:inline">Add Medication</span>
+            <span className="hidden sm:inline md:hidden">+ Drug</span>
           </button>
         )}
 
         {/* Fast POS Launch button */}
         <Link
           href="/pos"
-          className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition-all shadow-emerald-600/20 active:scale-95"
+          className="flex items-center gap-1 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition-all shadow-emerald-600/20 active:scale-95"
+          title="Launch POS Terminal"
         >
           <ShoppingCart className="w-3.5 h-3.5" />
-          <span>POS Checkout</span>
+          <span className="hidden sm:inline">POS Checkout</span>
+          <span className="sm:hidden font-bold">POS</span>
         </Link>
       </div>
 

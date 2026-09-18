@@ -18,6 +18,7 @@ import {
   Sparkles,
   Barcode,
   Clock,
+  ArrowLeft,
 } from "lucide-react";
 import { toast } from "sonner";
 import { processSaleTransaction, searchPOSProducts } from "@/actions/pos";
@@ -51,6 +52,7 @@ export function POSInterface({ initialProducts, settings, user }: POSInterfacePr
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [mobileTab, setMobileTab] = useState<"catalog" | "cart">("catalog");
   const [discountType, setDiscountType] = useState<"fixed" | "percent">("fixed");
   const [discountValue, setDiscountValue] = useState<number>(0);
   const [customerName, setCustomerName] = useState("");
@@ -216,10 +218,50 @@ export function POSInterface({ initialProducts, settings, user }: POSInterfacePr
     });
   };
 
+  const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
   return (
-    <div className="flex-1 flex flex-col lg:flex-row h-[calc(100vh-4rem)] overflow-hidden bg-slate-100">
+    <div className="flex-1 flex flex-col lg:flex-row h-[calc(100vh-4rem)] overflow-hidden bg-slate-100 relative">
+      {/* Mobile Top View Switcher (phones < lg) */}
+      <div className="lg:hidden flex items-center justify-between p-2.5 bg-white border-b border-slate-200 shrink-0">
+        <div className="flex items-center gap-1.5 w-full bg-slate-100 p-1 rounded-xl">
+          <button
+            type="button"
+            onClick={() => setMobileTab("catalog")}
+            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
+              mobileTab === "catalog"
+                ? "bg-white text-slate-900 shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            Medicines ({products.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileTab("cart")}
+            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+              mobileTab === "cart"
+                ? "bg-emerald-600 text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <ShoppingCart className="w-3.5 h-3.5" />
+            <span>Cart ({totalCartCount})</span>
+            {grandTotal > 0 && (
+              <span>
+                • {settings.currencySymbol} {grandTotal.toFixed(2)}
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
+
       {/* LEFT COLUMN: Drug Catalog & Search */}
-      <div className="flex-1 flex flex-col p-4 overflow-hidden border-r border-slate-200">
+      <div
+        className={`flex-1 flex flex-col p-3 sm:p-4 overflow-hidden border-r border-slate-200 ${
+          mobileTab === "cart" ? "hidden lg:flex" : "flex"
+        }`}
+      >
         {/* Search Bar & Barcode Input */}
         <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs mb-3 flex items-center gap-3">
           <div className="relative flex-1">
@@ -345,16 +387,28 @@ export function POSInterface({ initialProducts, settings, user }: POSInterfacePr
       </div>
 
       {/* RIGHT COLUMN: Real-Time Cart & Checkout */}
-      <div className="w-full lg:w-96 bg-white border-l border-slate-200 flex flex-col h-full shadow-lg">
+      <div
+        className={`w-full lg:w-96 bg-white border-l border-slate-200 flex flex-col h-full shadow-lg ${
+          mobileTab === "catalog" ? "hidden lg:flex" : "flex"
+        }`}
+      >
         {/* Cart Header */}
-        <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="p-3 sm:p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setMobileTab("catalog")}
+              className="lg:hidden p-1.5 -ml-1 text-slate-500 hover:text-slate-800 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
+              title="Back to medicines catalog"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
             <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
               <ShoppingCart className="w-4 h-4" />
             </div>
             <div>
               <h2 className="text-sm font-bold text-slate-900">Active Sale Cart</h2>
-              <p className="text-[11px] text-slate-500">{cart.length} unique item(s)</p>
+              <p className="text-[11px] text-slate-500">{totalCartCount} item(s) in cart</p>
             </div>
           </div>
           {cart.length > 0 && (
@@ -559,6 +613,27 @@ export function POSInterface({ initialProducts, settings, user }: POSInterfacePr
           </button>
         </div>
       </div>
+
+      {/* Floating Bottom Cart Bar for Mobile */}
+      {cart.length > 0 && mobileTab === "catalog" && (
+        <div className="lg:hidden fixed bottom-3 left-3 right-3 z-30">
+          <button
+            type="button"
+            onClick={() => setMobileTab("cart")}
+            className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-xs shadow-xl shadow-emerald-900/30 flex items-center justify-between active:scale-[0.98] transition-all cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[11px] font-extrabold">
+                {totalCartCount}
+              </div>
+              <span>View Cart & Checkout</span>
+            </div>
+            <span className="text-sm font-black">
+              {settings.currencySymbol} {grandTotal.toFixed(2)} &rarr;
+            </span>
+          </button>
+        </div>
+      )}
 
       {/* Receipt Modal */}
       {completedSale && (
